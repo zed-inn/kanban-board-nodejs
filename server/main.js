@@ -2,6 +2,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import helmet from "helmet";
 import { AppRouter } from "../routes/router.js";
+import "../utils/response.js";
 
 const app = express();
 

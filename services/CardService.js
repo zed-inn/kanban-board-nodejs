@@ -41,8 +41,13 @@ export class CardService {
   };
 
   // create card
-  static create = async (groupName, title, content) => {
-    const validationResult = this.validate({ groupName, title, content });
+  static create = async (groupName, title, content, order) => {
+    const validationResult = this.validate({
+      groupName,
+      title,
+      content,
+      order,
+    });
     if (!validationResult.isValid)
       return Service.result(
         Service.CODE.FAILED,
@@ -70,7 +75,7 @@ export class CardService {
       const cards = await Card.findAll({
         where: { groupName },
         order: [["order", "desc"]],
-        limit: page * this.PER_PAGE,
+        limit: this.PER_PAGE,
         offset: (page - 1) * this.PER_PAGE,
       });
       const cardJsons = cards.map((c) => c.get({ plain: true }));
