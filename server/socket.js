@@ -6,7 +6,7 @@ import { CardService } from "../services/CardService.js";
 import { Service } from "../utils/services.js";
 
 const server = createServer(app);
-const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
     origin: env.server.socket.origin,
     methods: ["GET", "POST"],
