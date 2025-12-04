@@ -32,7 +32,7 @@ export class CardService {
       delete result.values.order;
     }
 
-    if (!reason) {
+    if (!result.reason) {
       result.isValid = true;
       result.values.title = title.trim();
       result.values.content = content.trim();
@@ -78,7 +78,11 @@ export class CardService {
         limit: this.PER_PAGE,
         offset: (page - 1) * this.PER_PAGE,
       });
-      const cardJsons = cards.map((c) => c.get({ plain: true }));
+      const cardJsons = cards.map((c) => {
+        c = c.get({ plain: true });
+        c.order = Number(c.order);
+        return c;
+      });
 
       return Service.result(Service.CODE.OK, null, { cards: cardJsons });
     } catch (error) {
