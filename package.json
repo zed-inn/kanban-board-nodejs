@@ -1,34 +1,37 @@
 {
   "name": "kanban-board",
   "version": "1.0.0",
-  "description": "A real time kanban board",
+  "description": "kanban board nodejs",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --signal SIGINT app.js",
-    "start": "node app.js"
+    "clean": "rm -rf dist",
+    "dev": "nodemon",
+    "build": "npm run clean && tsc && tsc-alias",
+    "start": "node --max-old-space-size=450 ./dist/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zed-inn/A-Real-Time-Kanban-Board.git"
+    "url": "git+https://github.com/zed-inn/kanban-board-nodejs.git"
   },
-  "type": "module",
-  "author": "Zed",
+  "author": "zed",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/zed-inn/A-Real-Time-Kanban-Board/issues"
+    "url": "https://github.com/zed-inn/kanban-board-nodejs/issues"
   },
-  "homepage": "https://github.com/zed-inn/A-Real-Time-Kanban-Board#readme",
+  "homepage": "https://github.com/zed-inn/kanban-board-nodejs#readme",
   "devDependencies": {
-    "cookie-parser": "^1.4.7",
-    "dotenv": "^17.2.3",
-    "helmet": "^8.1.0",
+    "@types/node": "^25.0.9",
+    "@types/pg": "^8.16.0",
     "nodemon": "^3.1.11",
-    "pg": "^8.16.3"
+    "tsc": "^2.0.4",
+    "tsc-alias": "^1.8.16",
+    "tsx": "^4.21.0"
   },
   "dependencies": {
-    "express": "^5.1.0",
-    "sequelize": "^6.37.7",
-    "socket.io": "^4.8.1"
+    "dotenv": "^17.2.3",
+    "fastify": "^5.7.1",
+    "socket.io": "^4.8.3",
+    "typescript": "^5.9.3"
   }
 }
