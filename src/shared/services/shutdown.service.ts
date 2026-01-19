@@ -1,3 +1,4 @@
+import pool from "@config/db";
 import app from "../../app";
 import io from "../../socket";
 
@@ -9,6 +10,9 @@ export const shutdown = async (signal: string) => {
       if (err) app.log.error(err);
       else app.log.info("Socket closed.");
     });
+
+    await pool.end();
+    app.log.info("Postgres closed.");
 
     await app.close();
     app.log.info("Fastify application closed.");

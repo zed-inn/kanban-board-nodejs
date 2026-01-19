@@ -2,10 +2,14 @@ import { env } from "@config/env";
 import app from "./app";
 import io from "./socket";
 import { shutdown } from "@shared/services/shutdown.service";
+import pool from "@config/db";
 
 const startServer = async () => {
   try {
     io; // Execute io
+    app.log.info("Socket enabled.");
+    pool; // Know pool connected
+    app.log.info("Postgres connected.");
     await app.listen({ port: env.APP_PORT, host: env.APP_HOST });
   } catch (err) {
     app.log.error(err);

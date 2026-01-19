@@ -2,7 +2,6 @@ import { Server } from "socket.io";
 import app from "./app";
 
 const io = new Server(app.server, {});
-app.log.info("Socket enabled.");
 
 io.on("connection", async (socket) => {
   console.log(`Socket connected: ${socket.id}`);
