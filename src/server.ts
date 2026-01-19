@@ -12,6 +12,7 @@ const startServer = async () => {
     await app.listen({ port: env.APP_PORT, host: env.APP_HOST });
   } catch (err) {
     app.log.error(err);
+    shutdown("ERROR");
     process.exit(1);
   }
 };
