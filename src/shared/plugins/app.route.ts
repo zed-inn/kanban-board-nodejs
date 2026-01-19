@@ -10,9 +10,8 @@ const routes: Record<
 > = {};
 
 const router = async (app: FastifyInstance, options: FastifyPluginOptions) => {
-  for (const [prefix, route] of Object.entries(routes)) {
+  for (const [prefix, route] of Object.entries(routes))
     app.register(route, { prefix });
-  }
 };
 
 export const AppRouter = router;
