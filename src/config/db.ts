@@ -3,9 +3,11 @@ import { env } from "./env";
 
 export class DatabaseConn {
   private pool: Pool;
+  protected logger: Function = console.log;
   public connected: boolean = false;
 
-  constructor() {
+  constructor(logger?: Function) {
+    if (logger) this.logger = logger;
     this.pool = new Pool({
       user: env.PG_USER,
       host: env.PG_HOST,
@@ -13,11 +15,24 @@ export class DatabaseConn {
       database: env.PG_DATABASE,
       port: env.PG_PORT,
     });
-    this.connected = true;
+
+    try {
+      this.query("SELECT 1+1;");
+    } catch (err) {
+      this.connected = true;
+    }
   }
 
   query = async (query: string, values?: unknown[]) => {
-    return await this.pool.query(query, values);
+    const startTime = Date.now();
+
+    const res = await this.pool.query(query, values);
+
+    const endTime = Date.now();
+    const queryLog = { query, timeTaken: `${endTime - startTime} ms` };
+    if (this.logger) this.logger(queryLog);
+
+    return res;
   };
 
   close = async (fn?: (err?: Error) => void) => {
