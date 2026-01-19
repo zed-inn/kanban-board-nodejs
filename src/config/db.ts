@@ -30,7 +30,7 @@ export class DatabaseConn {
 
     const endTime = Date.now();
     const queryLog = { query, timeTaken: `${endTime - startTime} ms` };
-    if (this.logger) this.logger(queryLog);
+    if (this.logger && env.NODE_ENV !== "prod") this.logger(queryLog);
 
     return res;
   };
