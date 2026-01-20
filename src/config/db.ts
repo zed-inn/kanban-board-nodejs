@@ -5,6 +5,7 @@ export class DatabaseConn {
   private pool: Pool;
   protected logger: Function = console.log;
   public connected: boolean = false;
+  protected logEnabled: boolean = false;
 
   constructor(logger?: Function) {
     if (logger) this.logger = logger;
@@ -21,18 +22,29 @@ export class DatabaseConn {
     } catch (err) {
       this.connected = true;
     }
+
+    this.logEnabled = this.logger && env.NODE_ENV !== "prod";
   }
 
   query = async (query: string, values?: unknown[]) => {
-    const startTime = Date.now();
+    const startTime = this.logEnabled ? Date.now() : 0;
 
     const res = await this.pool.query(query, values);
 
-    const endTime = Date.now();
-    const queryLog = { query, timeTaken: `${endTime - startTime} ms` };
-    if (this.logger && env.NODE_ENV !== "prod") this.logger(queryLog);
+    if (this.logEnabled) {
+      const endTime = Date.now();
+      const queryLog = {
+        query: query.replace(/\s+/g, " "),
+        timeTaken: `${endTime - startTime} ms`,
+      };
+      this.logger(queryLog);
+    }
 
     return res;
+  };
+
+  getClient = async () => {
+    return await this.pool.connect();
   };
 
   close = async (fn?: (err?: Error) => void) => {

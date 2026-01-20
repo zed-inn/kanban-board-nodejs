@@ -11,6 +11,17 @@ const EnvSchema = z.object({
   PG_DATABASE: z.string("Invalid Pg Database"),
   PG_PASSWORD: z.string("Invalid Pg Password"),
   PG_PORT: z.coerce.number("Invalid Pg Port").int().positive().default(5432),
+  JWT_SECRET: z.string("Invalid Jwt Secret"),
+  JWT_ACCESS_MAX_AGE_MINS: z.coerce
+    .number("Invalid Max Age")
+    .int()
+    .positive()
+    .default(60),
+  JWT_REFRESH_MAX_AGE_MINS: z.coerce
+    .number("Invalid Max Age")
+    .int()
+    .positive()
+    .default(300),
 });
 
 export const env = EnvSchema.parse(process.env);
