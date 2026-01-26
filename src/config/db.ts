@@ -1,5 +1,11 @@
-import { Pool } from "pg";
+import { Pool, PoolClient, QueryResult } from "pg";
 import { env } from "./env";
+
+interface TPoolClient extends PoolClient {
+  beginTransaction: () => Promise<void | QueryResult<any>>;
+  commitTransaction: () => Promise<void | QueryResult<any>>;
+  rollbackTransaction: () => Promise<void | QueryResult<any>>;
+}
 
 export class DatabaseConn {
   private pool: Pool;
@@ -44,7 +50,20 @@ export class DatabaseConn {
   };
 
   getClient = async () => {
-    return await this.pool.connect();
+    const client = (await this.pool.connect()) as any;
+    const _client = client as PoolClient;
+
+    client.beginTransaction = () => _client.query("BEGIN;");
+    client.commitTransaction = async () => {
+      await _client.query("COMMIT;");
+      _client.release();
+    };
+    client.rollbackTransaction = async () => {
+      await _client.query("ROLLBACK;");
+      _client.release();
+    };
+
+    return client as TPoolClient;
   };
 
   close = async (fn?: (err?: Error) => void) => {

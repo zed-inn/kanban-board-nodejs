@@ -1,15 +1,19 @@
-import { FastifyInstance, FastifyPluginOptions, FastifyRequest } from "fastify";
+import { ZodFastifyInstance } from "@shared/types/zod-fastify";
+import { FastifyPluginOptions } from "fastify";
 
 // { prefix : router }
 const routes: Record<
   string,
   (
-    router: FastifyInstance,
+    router: ZodFastifyInstance,
     options: FastifyPluginOptions,
   ) => void | Promise<void>
 > = {};
 
-const router = async (app: FastifyInstance, options: FastifyPluginOptions) => {
+const router = async (
+  app: ZodFastifyInstance,
+  options: FastifyPluginOptions,
+) => {
   for (const [prefix, route] of Object.entries(routes))
     app.register(route, { prefix });
 };

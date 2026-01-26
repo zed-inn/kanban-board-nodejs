@@ -1,59 +1,73 @@
 import db from "@config/db";
-import { Board, BoardAttributes } from "./board.table";
+import { Board } from "./board.model";
+import { createOffsetFn } from "@shared/utils/create-offset-fn";
+import { PER_PAGE } from "@config/constants/items-per-page";
+import { MemberService } from "../member/member.service";
+import { ID } from "@config/constants/db-schema";
 
 export class BoardService {
-  static getById = async (id: string) => {
-    const _board = await Board.query("SELECT * FROM boards WHERE id = $1;", [
-      id,
-    ]);
-    return _board.rows.at(0) ?? null;
+  private static offset = createOffsetFn(PER_PAGE.BOARDS);
+
+  static getByUserId = async (userId: ID, page: number) => {
+    const boards = await Board.query(
+      "SELECT boards.* FROM boards JOIN members ON members.board_id = boards.id WHERE members.member_id = $1 OFFSET $2 LIMIT $3 ORDER BY boards.updated_at DESC;",
+      [userId, this.offset(page), PER_PAGE.BOARDS],
+    );
+    return boards;
   };
 
-  static create = async (name: string, userId: string) => {
+  static create = async (name: string, userId: ID) => {
     const client = await db.getClient();
 
     try {
-      await client.query("BEGIN;");
+      await client.beginTransaction();
 
-      const _board = await client.query(
-        "INSERT INTO boards(name, user_id) VALUES($1, $2) RETURNING *;",
-        [name, userId],
-      );
-      const board = (_board.rows as BoardAttributes[]).at(0) ?? null;
-      if (!board) throw new Error("Board creation failed.");
+      const board = await Board.ops.create({ name, userId }, { client });
+      if (!board) throw new Error("Board couldn't be created.");
 
-      const _userBoard = await client.query(
-        "INSERT INTO users_boards_junction(user_id, board_id) VALUES($1, $2) RETURNING *;",
-        [userId, board.id],
-      );
-      const userBoard = _userBoard.rows.at(0) ?? null;
-      if (!userBoard) throw new Error("Board creation failed.");
+      const member = await MemberService.addMember(board.id, userId, {
+        client,
+      });
+      if (!member) throw new Error("Board couldn't be created.");
 
-      await client.query("COMMIT;");
+      await client.commitTransaction();
+
       return board;
-    } catch (err) {
-      console.log(err);
-      await client.query("ROLLBACK;");
-    } finally {
-      client.release();
+    } catch (error) {
+      await client.rollbackTransaction();
     }
 
     return null;
   };
 
-  static updateNameById = async (id: string, name: string, userId: string) => {
-    const _board = await Board.query(
-      "UPDATE boards SET name = $1, updated_at = NOW() WHERE id = $2 AND userId = $3 RETURNING *;",
-      [name, id, userId],
-    );
-    return _board.rows.at(0) ?? null;
+  static updateById = async (name: string, id: ID, userId: ID) => {
+    return await Board.ops.updateByFilters({ name }, { id, userId });
   };
 
-  static deleteById = async (id: string, userId: string) => {
-    const _board = await Board.query(
-      "DELETE FROM boards WHERE id = $1 AND userId = $2 RETURNING *;",
-      [id, userId],
-    );
-    return _board.rows.at(0) ?? null;
+  static deleteById = async (id: ID, userId: ID) => {
+    const client = await db.getClient();
+
+    try {
+      await client.beginTransaction();
+
+      const _board = await Board.query(
+        "DELETE FROM boards WHERE id = $1 AND user_id = $2 RETURNING *;",
+        [id, userId],
+        { client },
+      );
+      const board = _board[0] ?? null;
+      if (!board) throw new Error("Board couldn't be deleted.");
+
+      const member = await MemberService.exitMembership(board.id, userId);
+      if (!member) throw new Error("Board couldn't be deleted.");
+
+      await client.commitTransaction();
+
+      return board;
+    } catch (error) {
+      await client.rollbackTransaction();
+    }
+
+    return null;
   };
 }

@@ -1,0 +1,7 @@
+export const TABLE = {
+  ID_PRIM_KEY: `id UUID PRIMARY KEY UNIQUE NOT NULL DEFAULT UUIDV7()`,
+  CREATED_AT: `created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()`,
+  UPDATED_AT: `updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()`,
+  FOREIGN_KEY: (key: string, table: string, refKey: string) =>
+    `FOREIGN KEY(${key}) REFERENCES ${table}(${refKey})`,
+};
