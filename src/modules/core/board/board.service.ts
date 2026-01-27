@@ -23,21 +23,14 @@ export class BoardService {
       await client.beginTransaction();
 
       const board = await Board.ops.create({ name, userId }, { client });
-      if (!board) throw new Error("Board couldn't be created.");
-
-      const member = await MemberService.addMember(board.id, userId, {
-        client,
-      });
-      if (!member) throw new Error("Board couldn't be created.");
+      await MemberService.addMember(board.id, userId, { client });
 
       await client.commitTransaction();
-
       return board;
     } catch (error) {
       await client.rollbackTransaction();
+      throw error;
     }
-
-    return null;
   };
 
   static updateById = async (name: string, id: ID, userId: ID) => {
@@ -50,24 +43,14 @@ export class BoardService {
     try {
       await client.beginTransaction();
 
-      const _board = await Board.query(
-        "DELETE FROM boards WHERE id = $1 AND user_id = $2 RETURNING *;",
-        [id, userId],
-        { client },
-      );
-      const board = _board[0] ?? null;
-      if (!board) throw new Error("Board couldn't be deleted.");
-
-      const member = await MemberService.exitMembership(board.id, userId);
-      if (!member) throw new Error("Board couldn't be deleted.");
+      const board = await Board.ops.deleteOne({ id, userId }, { client });
+      await MemberService.exitMembership(board.id, userId);
 
       await client.commitTransaction();
-
       return board;
     } catch (error) {
       await client.rollbackTransaction();
+      throw error;
     }
-
-    return null;
   };
 }

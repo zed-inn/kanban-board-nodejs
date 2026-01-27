@@ -1,19 +1,14 @@
+import { BoardRouter } from "@modules/core/board";
 import { ZodFastifyInstance } from "@shared/types/zod-fastify";
 import { FastifyPluginOptions } from "fastify";
 
 // { prefix : router }
 const routes: Record<
   string,
-  (
-    router: ZodFastifyInstance,
-    options: FastifyPluginOptions,
-  ) => void | Promise<void>
-> = {};
+  (router: ZodFastifyInstance, options?: FastifyPluginOptions) => Promise<void>
+> = { "/boards": BoardRouter };
 
-const router = async (
-  app: ZodFastifyInstance,
-  options: FastifyPluginOptions,
-) => {
+const router = async (app: ZodFastifyInstance) => {
   for (const [prefix, route] of Object.entries(routes))
     app.register(route, { prefix });
 };

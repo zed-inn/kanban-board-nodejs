@@ -1,8 +1,8 @@
 import { env } from "@config/env";
-import app from "./app";
-import io from "./socket";
 import { shutdown } from "@shared/services/shutdown.service";
 import db from "@config/db";
+import app from "./app";
+import io from "./socket";
 
 const startServer = async () => {
   try {

@@ -1,6 +1,7 @@
 import { DatabaseConnServiceOptions } from "@shared/types/database-conn";
 import { Member } from "./member.model";
 import { ID } from "@config/constants/db-schema";
+import { AppError } from "@shared/utils/app-error";
 
 export class MemberService {
   static isMember = async (
@@ -29,11 +30,13 @@ export class MemberService {
     memberId: ID,
     options: DatabaseConnServiceOptions = {},
   ) => {
-    const member = await Member.query(
+    const _member = await Member.query(
       "DELETE FROM members WHERE board_id = $1 AND member_id = $2 RETURNING *;",
       [boarId, memberId],
       options,
     );
-    return member[0] ?? null;
+    const member = _member[0];
+    if (!member) throw new AppError("Membership couldn't be ended.", 500);
+    return member;
   };
 }

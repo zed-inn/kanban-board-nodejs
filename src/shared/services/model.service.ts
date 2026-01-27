@@ -1,6 +1,7 @@
 import { ID } from "@config/constants/db-schema";
 import db from "@config/db";
 import { DatabaseConnServiceOptions } from "@shared/types/database-conn";
+import { AppError } from "@shared/utils/app-error";
 import { removeUndefined } from "@shared/utils/clean-object";
 import {
   convertCamelToSnake,
@@ -76,12 +77,14 @@ export class DbModelOps<T extends z.infer<z.ZodObject>> {
   };
 
   getById = async (id: ID, options: DatabaseConnServiceOptions = {}) => {
-    const obj = (await this.model.query(
+    const _obj = (await this.model.query(
       `SELECT * FROM ${this.model.details.tableName} WHERE id = $1;`,
       [id],
       options,
     )) as T[];
-    return obj[0] ?? null;
+    const obj = _obj[0];
+    if (!obj) throw new AppError("Not found.", 400);
+    return obj;
   };
 
   create = async (
@@ -90,12 +93,14 @@ export class DbModelOps<T extends z.infer<z.ZodObject>> {
   ) => {
     const data = convertCamelToSnake(removeUndefined(_data));
 
-    const obj = (await this.model.query(
+    const _obj = (await this.model.query(
       `INSERT INTO ${this.model.details.tableName}(${Object.keys(data).join(", ")}) VALUES(${DbModelUtils.createPlaceholdersFromTo(1, Object.values(data).length).join(", ")}) RETURNING *;`,
       [...Object.values(data)],
       options,
     )) as T[];
-    return obj[0] ?? null;
+    const obj = _obj[0];
+    if (!obj) throw new AppError("Internal Server Error.", 500);
+    return obj;
   };
 
   updateByFilters = async (
@@ -106,12 +111,14 @@ export class DbModelOps<T extends z.infer<z.ZodObject>> {
     const data = convertCamelToSnake(removeUndefined(_data));
     const filters = convertCamelToSnake(removeUndefined(_filters));
 
-    const obj = (await this.model.query(
+    const _obj = (await this.model.query(
       `UPDATE ${this.model.details.tableName} SET ${DbModelUtils.createPlaceholdersWithKeysFrom(Object.keys(data), 1).join(", ")}${Object.keys(this.model.schema.shape).includes("updatedAt") ? ", updated_at = NOW()" : ""} WHERE ${DbModelUtils.createPlaceholdersWithKeysFrom(Object.keys(filters), Object.keys(data).length + 1).join("AND")} RETURNING *;`,
       [...Object.values(data), ...Object.values(filters)],
       options,
     )) as T[];
-    return obj[0] ?? null;
+    const obj = _obj[0];
+    if (!obj) throw new AppError("Internal Server Error.", 500);
+    return obj;
   };
 
   deleteByFilters = async (
@@ -126,6 +133,13 @@ export class DbModelOps<T extends z.infer<z.ZodObject>> {
       options,
     );
     return objs as T[];
+  };
+
+  deleteOne = async (...args: Parameters<typeof this.deleteByFilters>) => {
+    const _objs = await this.deleteByFilters(...args);
+    const obj = _objs[0];
+    if (!obj) throw new AppError("Internal Server Error.", 500);
+    return obj;
   };
 }
 

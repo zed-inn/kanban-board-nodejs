@@ -6,6 +6,7 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
+import { authenticate } from "@shared/plugins/authenticate";
 
 const app = fastify({
   logger: env.NODE_ENV === "dev",
@@ -18,6 +19,7 @@ app.setSerializerCompiler(serializerCompiler);
 app.decorateRequest("user", undefined);
 
 app.register(fastifyCookie);
+app.register(authenticate);
 app.register(AppRouter);
 
 export default app;

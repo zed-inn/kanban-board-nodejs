@@ -58,9 +58,8 @@ export class ColumnService {
       return column;
     } catch (error) {
       await client.rollbackTransaction();
+      throw error;
     }
-
-    return null;
   };
 
   static updateById = async (data: ColumnUpdateDto, id: ID, boardId: ID) => {
@@ -75,7 +74,6 @@ export class ColumnService {
           Column.ops.getById(id, { client }),
           Column.ops.getById(data.inPlaceOf, { client }),
         ]);
-        if (!_c1 || !_c2) throw new Error("Invalid Id/s");
 
         const isLeft = _c1.position < _c2.position;
         const lr = {
@@ -100,23 +98,16 @@ export class ColumnService {
         { id, boardId },
         { client },
       );
-      if (!column) throw new Error("Column couldn't be updated.");
 
       await client.commitTransaction();
-
       return column;
     } catch (error) {
       await client.rollbackTransaction();
+      throw error;
     }
-
-    return null;
   };
 
   static deleteById = async (id: ID, boardId: string) => {
-    const column = await Column.query(
-      "DELETE FROM columns WHERE id = $1 AND board_id = $2 RETURNING *;",
-      [id, boardId],
-    );
-    return column[0] ?? null;
+    return await Column.ops.deleteOne({ id, boardId });
   };
 }

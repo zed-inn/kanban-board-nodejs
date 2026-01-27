@@ -2,13 +2,16 @@ import { ID } from "@config/constants/db-schema";
 import { USER } from "./user.constants";
 import bcrypt from "bcryptjs";
 import { User } from "./user.model";
+import { AppError } from "@shared/utils/app-error";
 
 export class UserService {
   static getByEmail = async (email: string) => {
     const users = await User.query("SELECT * FROM users WHERE email = $1;", [
       email,
     ]);
-    return users[0] ?? null;
+    const user = users[0] ?? null;
+    if (!user) throw new AppError("Not found.", 400);
+    return user;
   };
 
   static create = async (email: string, password: string) => {
@@ -27,11 +30,7 @@ export class UserService {
   };
 
   static deleteById = async (id: ID) => {
-    const user = await User.query(
-      "DELETE FROM users WHERE id = $1 RETURNING *;",
-      [id],
-    );
-    return user[0] ?? null;
+    return await User.ops.deleteOne({ id });
   };
 }
 
@@ -42,10 +41,7 @@ export class UserUtils {
   };
 
   static comparePassword = async (password: string, passwordHash: string) => {
-    try {
-      const match = await bcrypt.compare(password, passwordHash);
-      return match;
-    } catch {}
-    return false;
+    const match = await bcrypt.compare(password, passwordHash);
+    return match;
   };
 }

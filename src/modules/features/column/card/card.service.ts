@@ -64,9 +64,8 @@ export class CardService {
       return column;
     } catch (error) {
       await client.rollbackTransaction();
+      throw error;
     }
-
-    return null;
   };
 
   static updateById = async (
@@ -86,7 +85,6 @@ export class CardService {
           Card.ops.getById(id, { client }),
           Card.ops.getById(data.inPlaceOf, { client }),
         ]);
-        if (!_c1 || !_c2) throw new Error("Invalid Id/s");
 
         const isLeft = _c1.position < _c2.position;
         const lr = {
@@ -126,23 +124,16 @@ export class CardService {
         { id, columnId, boardId },
         { client },
       );
-      if (!column) throw new Error("Card couldn't be updated.");
 
       await client.commitTransaction();
-
       return column;
     } catch (error) {
       await client.rollbackTransaction();
+      throw error;
     }
-
-    return null;
   };
 
   deleteById = async (id: ID, columnId: ID, boardId: ID) => {
-    const card = await Card.query(
-      "DELETE FROM cards WHERE id = $1 AND column_id = $2 AND board_id = $3 RETURNING *;",
-      [id, columnId, boardId],
-    );
-    return card[0] ?? null;
+    return await Card.ops.deleteOne({ id, columnId, boardId });
   };
 }
