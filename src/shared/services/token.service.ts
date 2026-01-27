@@ -27,12 +27,12 @@ export class TokenService<
 
   validateToken =
     <K extends (typeof this.types._)[number]>(type: K) =>
-    (token: string): { valid: boolean; data?: K extends "ACCESS" ? T : W } => {
+    (token: string): null | (K extends "ACCESS" ? T : W) => {
       try {
         const data = jwt.verify(token, env.JWT_SECRET);
-        return { valid: true, data: data as K extends "ACCESS" ? T : W };
+        return data as K extends "ACCESS" ? T : W;
       } catch {
-        return { valid: false };
+        return null;
       }
     };
 }

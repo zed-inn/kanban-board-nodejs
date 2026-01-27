@@ -1,6 +1,9 @@
+import {
+  AuthCookiePartialSchema,
+  COOKIE,
+  COOKIE_OPTIONS,
+} from "@config/constants/cookie";
 import { AuthTokenService } from "@modules/core/auth/auth.service";
-import { AuthPayload } from "@shared/schemas/auth.schema";
-import { cookieAccessToken, TOKEN } from "@shared/utils/set-tokens-in-cookie";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
 
@@ -9,27 +12,23 @@ export const authenticate = fp(async (app: FastifyInstance) => {
     "preValidation",
     async (req: FastifyRequest, reply: FastifyReply) => {
       try {
-        const cks = req.cookies as Record<string, unknown>;
-        const tokens = {
-          access: cks[TOKEN.ACCESS] as string | undefined,
-          refresh: cks[TOKEN.REFRESH] as string | undefined,
-        };
+        const { "access-token": _at, "refresh-token": _rt } =
+          AuthCookiePartialSchema.parse(req.cookies);
 
-        if (tokens.access) {
-          const payload = AuthTokenService.validateToken("ACCESS")(
-            tokens.access,
-          );
-          if (payload.valid) req.user = payload.data as AuthPayload;
+        if (_at) {
+          const payload = AuthTokenService.validateToken("ACCESS")(_at);
+          if (payload) req.user = payload;
           return;
-        } else if (tokens.refresh) {
+        } else if (_rt) {
           // get user again, but as access and refresh are same,
-          const payload = AuthTokenService.validateToken("REFRESH")(
-            tokens.refresh,
-          );
-          if (payload.valid) {
-            const ac = cookieAccessToken(payload.data as AuthPayload);
-            reply.setCookie(ac.name, ac.value, ac.options);
-            req.user = payload.data as AuthPayload; // same data, that's why
+          const payload = AuthTokenService.validateToken("REFRESH")(_rt);
+          if (payload) {
+            reply.setCookie(
+              COOKIE.ACCESS_TOKEN,
+              AuthTokenService.createToken("ACCESS")(payload),
+              COOKIE_OPTIONS.ACCESS_TOKEN,
+            );
+            req.user = payload; // same data, that's why no change
             return;
           }
         }

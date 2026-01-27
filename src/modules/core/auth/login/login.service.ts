@@ -12,9 +12,9 @@ export class LoginService {
     );
     if (!matched) throw new AppError("Unauthorized.", 401);
 
-    return [
-      AuthTokenService.createToken("ACCESS")({ id: user.id }),
-      AuthTokenService.createToken("REFRESH")({ id: user.id }),
-    ];
+    return {
+      access: AuthTokenService.createToken("ACCESS")({ id: user.id }),
+      refresh: AuthTokenService.createToken("REFRESH")({ id: user.id }),
+    };
   };
 }

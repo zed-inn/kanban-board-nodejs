@@ -7,10 +7,10 @@ export class RegisterService {
     try {
       const user = await UserService.create(email, password);
 
-      return [
-        AuthTokenService.createToken("ACCESS")({ id: user.id }),
-        AuthTokenService.createToken("REFRESH")({ id: user.id }),
-      ];
+      return {
+        access: AuthTokenService.createToken("ACCESS")({ id: user.id }),
+        refresh: AuthTokenService.createToken("REFRESH")({ id: user.id }),
+      };
     } catch (error) {
       throw new AppError("Email already used.", 400);
     }
