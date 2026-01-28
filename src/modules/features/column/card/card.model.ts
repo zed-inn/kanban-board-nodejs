@@ -23,7 +23,7 @@ export const CardModel = z.object({
   boardId: BoardModel.shape.id,
   columnId: ColumnModel.shape.id,
   title: z.string(),
-  body: z.string().nullable(),
+  body: z.string().nullable().default(null),
   position: z.coerce.number(),
   createdAt: z.date(),
   updatedAt: z.date(),
