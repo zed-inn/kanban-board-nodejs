@@ -38,19 +38,6 @@ export class BoardService {
   };
 
   static deleteById = async (id: ID, userId: ID) => {
-    const client = await db.getClient();
-
-    try {
-      await client.beginTransaction();
-
-      const board = await Board.ops.deleteOne({ id, userId }, { client });
-      await MemberService.exitMembership(board.id, userId);
-
-      await client.commitTransaction();
-      return board;
-    } catch (error) {
-      await client.rollbackTransaction();
-      throw error;
-    }
+    return await Board.ops.deleteOne({ id, userId });
   };
 }
