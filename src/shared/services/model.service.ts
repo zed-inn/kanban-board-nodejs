@@ -41,14 +41,11 @@ export class DbModel<T extends z.ZodObject> {
     ]
   ) {
     const [queryString, queryValues, options = null] = args;
-    try {
-      const res = await (options?.client ?? db).query(queryString, queryValues);
-      return res.rows.map((r) =>
-        this.schema.parse(convertSnakeToCamel(r)),
-      ) as z.infer<T>[];
-    } catch (err) {
-      throw err;
-    }
+
+    const res = await (options?.client ?? db).query(queryString, queryValues);
+    return res.rows.map((r) =>
+      this.schema.parse(convertSnakeToCamel(r)),
+    ) as z.infer<T>[];
   }
 }
 
@@ -130,12 +127,13 @@ export class DbModelOps<T extends z.infer<z.ZodObject>> {
 
     const query = `DELETE FROM ${this.model.details.tableName} WHERE ${DbModelUtils.createPlaceholdersWithKeysFrom(Object.keys(filters), 1).join(" AND ")} RETURNING *;`;
 
-    const objs = await this.model.query(
+    const objs = (await this.model.query(
       query,
       [...Object.values(filters)],
       options,
-    );
-    return objs as T[];
+    )) as T[];
+
+    return objs;
   };
 
   deleteOne = async (...args: Parameters<typeof this.deleteByFilters>) => {
