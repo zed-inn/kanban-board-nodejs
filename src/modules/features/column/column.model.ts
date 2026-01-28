@@ -20,7 +20,7 @@ export const ColumnModel = z.object({
   id: zId,
   boardId: BoardModel.shape.id,
   name: z.string(),
-  position: z.number(),
+  position: z.coerce.number(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

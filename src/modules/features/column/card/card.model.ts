@@ -24,7 +24,7 @@ export const CardModel = z.object({
   columnId: ColumnModel.shape.id,
   title: z.string(),
   body: z.string().nullable(),
-  position: z.number(),
+  position: z.coerce.number(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
