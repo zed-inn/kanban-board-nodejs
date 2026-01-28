@@ -45,7 +45,7 @@ export class ColumnService {
         "SELECT * FROM columns ORDER BY position DESC LIMIT 1;",
       );
       const lastCol = _lastCol[0] ?? null;
-      const lastPosition = lastCol?.position ?? 0;
+      const lastPosition = lastCol?.position ?? -1 * COLUMN.POSITION.SPARSED_BY; // so it gives 0 when no columns
 
       const column = await Column.ops.create({
         name,
@@ -69,28 +69,12 @@ export class ColumnService {
       await client.beginTransaction();
 
       let _data: Record<string, unknown> = { ...data };
-      if (data.inPlaceOf && data.inPlaceOf !== id) {
-        const [_c1, _c2] = await Promise.all([
-          Column.ops.getById(id, { client }),
-          Column.ops.getById(data.inPlaceOf, { client }),
-        ]);
+      if (data.inPlaceOf && data.inPlaceOf !== id)
+        _data.position = await this.getNewPosition(id, data.inPlaceOf, {
+          client,
+        });
 
-        const isLeft = _c1.position < _c2.position;
-        const lr = {
-          left: isLeft
-            ? await this.getByPostition(_c2.position, "AFTER", { client })
-            : _c2,
-          right: isLeft
-            ? _c2
-            : await this.getByPostition(_c2.position, "BEFORE", { client }),
-        };
-        const newPos = getMid(
-          lr.left?.position ?? null,
-          lr.right?.position ?? null,
-        );
-        _data.position = newPos;
-      }
-
+      console.log(_data);
       const values = ColumnUpdateDbSchema.parse(_data);
       if (!values) throw new Error("No values to update.");
       const column = await Column.ops.updateByFilters(
@@ -109,5 +93,34 @@ export class ColumnService {
 
   static deleteById = async (id: ID, boardId: string) => {
     return await Column.ops.deleteOne({ id, boardId });
+  };
+
+  static getNewPosition = async (
+    id: ID,
+    inPlaceOf: ID,
+    options: DatabaseConnServiceOptions = {},
+  ) => {
+    const [_c1, _c2] = await Promise.all([
+      Column.ops.getById(id, options),
+      Column.ops.getById(inPlaceOf, options),
+    ]);
+
+    const lr =
+      _c1.position > _c2.position
+        ? {
+            left: await this.getByPostition(_c2.position, "BEFORE", options),
+            right: _c2,
+          }
+        : {
+            left: _c2,
+            right: await this.getByPostition(_c2.position, "AFTER", options),
+          };
+
+    const newPos = getMid(
+      lr.left?.position ?? _c2.position - 2 * COLUMN.POSITION.SPARSED_BY,
+      lr.right?.position ?? _c2.position + 2 * COLUMN.POSITION.SPARSED_BY,
+    );
+
+    return newPos;
   };
 }

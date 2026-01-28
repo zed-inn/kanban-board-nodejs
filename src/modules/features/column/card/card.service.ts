@@ -7,6 +7,7 @@ import { CardUpdateDbSchema, CardUpdateDto } from "./dtos/card-service.dto";
 import db from "@config/db";
 import { getMid } from "@shared/utils/get-mid";
 import { CARD } from "./card.constants";
+import { AppError } from "@shared/utils/app-error";
 
 export class CardService {
   protected static offset = createOffsetFn(PER_PAGE.CARDS);
@@ -49,7 +50,7 @@ export class CardService {
         [columnId, boardId],
       );
       const lastCol = _lastCol[0] ?? null;
-      const lastPosition = lastCol?.position ?? 0;
+      const lastPosition = lastCol?.position ?? -1 * CARD.POSITION.SPARSED_BY;
 
       const column = await Card.ops.create({
         title,
@@ -81,40 +82,11 @@ export class CardService {
 
       let _data: Record<string, unknown> = { ...data };
       if (data.inPlaceOf && data.inPlaceOf !== id) {
-        const [_c1, _c2] = await Promise.all([
-          Card.ops.getById(id, { client }),
-          Card.ops.getById(data.inPlaceOf, { client }),
-        ]);
-
-        const isLeft = _c1.position < _c2.position;
-        const lr = {
-          left: isLeft
-            ? await this.getByPostitionInColumn(
-                _c2.position,
-                _c2.columnId,
-                "AFTER",
-                {
-                  client,
-                },
-              )
-            : _c2,
-          right: isLeft
-            ? _c2
-            : await this.getByPostitionInColumn(
-                _c2.position,
-                _c2.columnId,
-                "BEFORE",
-                {
-                  client,
-                },
-              ),
-        };
-        const newPos = getMid(
-          lr.left?.position ?? null,
-          lr.right?.position ?? null,
-        );
-        _data.columnId = _c2.columnId;
-        _data.position = newPos;
+        const newLocation = await this.getNewPosition(id, data.inPlaceOf, {
+          client,
+        });
+        _data.columnId = newLocation.columnId;
+        _data.position = newLocation.postion;
       }
 
       const values = CardUpdateDbSchema.parse(_data);
@@ -135,5 +107,47 @@ export class CardService {
 
   static deleteById = async (id: ID, columnId: ID, boardId: ID) => {
     return await Card.ops.deleteOne({ id, columnId, boardId });
+  };
+
+  static getNewPosition = async (
+    id: ID,
+    inPlaceOf: ID,
+    options: DatabaseConnServiceOptions = {},
+  ) => {
+    const [_c1, _c2] = await Promise.all([
+      Card.ops.getById(id, options),
+      Card.ops.getById(inPlaceOf, options),
+    ]);
+
+    if (_c1.boardId !== _c2.boardId)
+      throw new AppError("Columns must be of same board.", 400);
+
+    const lr =
+      _c1.position > _c2.position
+        ? {
+            left: await this.getByPostitionInColumn(
+              _c2.position,
+              _c2.columnId,
+              "BEFORE",
+              options,
+            ),
+            right: _c2,
+          }
+        : {
+            left: _c2,
+            right: await this.getByPostitionInColumn(
+              _c2.position,
+              _c2.columnId,
+              "AFTER",
+              options,
+            ),
+          };
+
+    const newPos = getMid(
+      lr.left?.position ?? _c2.position - 2 * CARD.POSITION.SPARSED_BY,
+      lr.right?.position ?? _c2.position + 2 * CARD.POSITION.SPARSED_BY,
+    );
+
+    return { postion: newPos, columnId: _c2.columnId };
   };
 }

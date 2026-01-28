@@ -52,7 +52,7 @@ export const CardRouter = async (router: ZodFastifyInstance) => {
   );
 
   router.patch(
-    "/",
+    "/:id",
     {
       schema: {
         body: UpdateCardBodySchema,
@@ -68,7 +68,7 @@ export const CardRouter = async (router: ZodFastifyInstance) => {
   );
 
   router.delete(
-    "/",
+    "/:id",
     {
       schema: { params: DeleteCardParamsSchema },
       preHandler: [
