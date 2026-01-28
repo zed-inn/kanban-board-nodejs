@@ -133,7 +133,7 @@ export class CardService {
     }
   };
 
-  deleteById = async (id: ID, columnId: ID, boardId: ID) => {
+  static deleteById = async (id: ID, columnId: ID, boardId: ID) => {
     return await Card.ops.deleteOne({ id, columnId, boardId });
   };
 }
