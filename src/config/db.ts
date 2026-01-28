@@ -21,6 +21,8 @@ export class DatabaseConn {
       password: env.PG_PASSWORD,
       database: env.PG_DATABASE,
       port: env.PG_PORT,
+      query_timeout: 5000,
+      connectionTimeoutMillis: 2000,
     });
 
     try {
