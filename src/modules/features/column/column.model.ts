@@ -12,7 +12,7 @@ const columnSqlSchema = `CREATE TABLE IF NOT EXISTS columns (
                           position NUMERIC UNIQUE NOT NULL DEFAULT 0,
                           ${TABLE.CREATED_AT},
                           ${TABLE.UPDATED_AT},
-                          ${TABLE.FOREIGN_KEY("board_id", "boards", "id")}
+                          ${TABLE.FOREIGN_KEY("board_id", "boards", "id")} ${TABLE.ON_DELETE.CASCADE}
                         );`;
 
 export const ColumnModel = z.object({

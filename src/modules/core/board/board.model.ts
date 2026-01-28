@@ -6,11 +6,11 @@ import { TABLE } from "@shared/utils/db-table-fields";
 
 const boardSqlSchema = `CREATE TABLE IF NOT EXISTS boards (
                           ${TABLE.ID_PRIM_KEY},
-                          user_id UUID NOT NULL,
+                          user_id UUID,
                           name VARCHAR(255) NOT NULL,
                           ${TABLE.CREATED_AT},
                           ${TABLE.UPDATED_AT},
-                          ${TABLE.FOREIGN_KEY("user_id", "users", "id")}
+                          ${TABLE.FOREIGN_KEY("user_id", "users", "id")} ${TABLE.ON_DELETE.SET_NULL}
                         );`;
 
 export const BoardModel = z.object({

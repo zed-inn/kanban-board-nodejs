@@ -9,8 +9,8 @@ const MemberSqlSchema = `CREATE TABLE IF NOT EXISTS members (
                           board_id UUID NOT NULL,
                           ${TABLE.CREATED_AT},
                           UNIQUE(member_id, board_id),
-                          ${TABLE.FOREIGN_KEY("member_id", "users", "id")},
-                          ${TABLE.FOREIGN_KEY("board_id", "boards", "id")}
+                          ${TABLE.FOREIGN_KEY("member_id", "users", "id")} ${TABLE.ON_DELETE.CASCADE},
+                          ${TABLE.FOREIGN_KEY("board_id", "boards", "id")} ${TABLE.ON_DELETE.CASCADE}
                         );`;
 
 export const MemberModel = z.object({

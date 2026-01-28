@@ -4,4 +4,8 @@ export const TABLE = {
   UPDATED_AT: `updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()`,
   FOREIGN_KEY: (key: string, table: string, refKey: string) =>
     `FOREIGN KEY(${key}) REFERENCES ${table}(${refKey})`,
+  ON_DELETE: {
+    SET_NULL: `ON DELETE SET NULL`,
+    CASCADE: `ON DELETE CASCADE`,
+  },
 };
