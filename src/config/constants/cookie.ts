@@ -10,8 +10,8 @@ export const COOKIE_OPTIONS: {
   ACCESS_TOKEN: CookieSerializeOptions;
   REFRESH_TOKEN: CookieSerializeOptions;
 } = {
-  ACCESS_TOKEN: { httpOnly: true, secure: true, sameSite: true },
-  REFRESH_TOKEN: { httpOnly: true, secure: true, sameSite: true },
+  ACCESS_TOKEN: { httpOnly: true, secure: true, sameSite: "strict" },
+  REFRESH_TOKEN: { httpOnly: true, secure: true, sameSite: "strict" },
 } as const;
 
 export const AuthCookieSchema = z.object({
