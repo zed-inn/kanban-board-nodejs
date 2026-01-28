@@ -10,7 +10,7 @@ interface TPoolClient extends PoolClient {
 export class DatabaseConn {
   private pool: Pool;
   protected logger: Function = console.log;
-  public connected: boolean = false;
+  public connected: boolean = true;
   protected logEnabled: boolean = false;
 
   constructor(logger?: Function) {
@@ -26,7 +26,7 @@ export class DatabaseConn {
     try {
       this.query("SELECT 1+1;");
     } catch (err) {
-      this.connected = true;
+      this.connected = false;
     }
 
     this.logEnabled = this.logger && env.NODE_ENV !== "prod";
