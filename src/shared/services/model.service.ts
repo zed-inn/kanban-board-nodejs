@@ -1,5 +1,6 @@
 import { ID } from "@config/constants/db-schema";
 import db from "@config/db";
+import { models } from "@shared/db/tables";
 import { DatabaseConnServiceOptions } from "@shared/types/database-conn";
 import { AppError } from "@shared/utils/app-error";
 import { removeUndefined } from "@shared/utils/clean-object";
@@ -26,7 +27,7 @@ export class DbModel<T extends z.ZodObject> {
     this.schema = schema;
     this.details = details;
 
-    this.createTable();
+    models.addMethod(this.createTable);
   }
 
   private createTable = async () => {

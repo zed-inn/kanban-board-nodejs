@@ -3,12 +3,16 @@ import { shutdown } from "@shared/services/shutdown.service";
 import db from "@config/db";
 import app from "./app";
 import io from "./socket";
+import { models } from "@shared/db/tables";
 
 const startServer = async () => {
   try {
     io; // Execute io
     app.log.info("Socket enabled.");
-    if (db.connected) app.log.info("Postgres connected.");
+    if (db.connected) {
+      app.log.info("Postgres connected.");
+      await models.runAll(() => console.log("Tables created."));
+    }
     await app.listen({ port: env.APP_PORT, host: env.APP_HOST });
   } catch (err) {
     app.log.error(err);
