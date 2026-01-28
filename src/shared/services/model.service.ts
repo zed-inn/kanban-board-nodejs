@@ -43,10 +43,6 @@ export class DbModel<T extends z.ZodObject> {
     const [queryString, queryValues, options = null] = args;
     try {
       const res = await (options?.client ?? db).query(queryString, queryValues);
-      if (!res.rowCount)
-        throw new Error("Invalid query given.", {
-          cause: "No rows generated.",
-        });
       return res.rows.map((r) =>
         this.schema.parse(convertSnakeToCamel(r)),
       ) as z.infer<T>[];
@@ -69,8 +65,10 @@ export class DbModelOps<T extends z.infer<z.ZodObject>> {
   ) => {
     const filters = convertCamelToSnake(removeUndefined(_filters));
 
+    const query = `SELECT * FROM ${this.model.details.tableName} WHERE ${DbModelUtils.createPlaceholdersWithKeysFrom(Object.keys(filters), 1).join(" AND ")};`;
+
     const objs = await this.model.query(
-      `SELECT * FROM ${this.model.details.tableName} WHERE ${DbModelUtils.createPlaceholdersWithKeysFrom(Object.keys(filters), 1).join("AND")};`,
+      query,
       [...Object.values(filters)],
       options,
     );
@@ -78,11 +76,9 @@ export class DbModelOps<T extends z.infer<z.ZodObject>> {
   };
 
   getById = async (id: ID, options: DatabaseConnServiceOptions = {}) => {
-    const _obj = (await this.model.query(
-      `SELECT * FROM ${this.model.details.tableName} WHERE id = $1;`,
-      [id],
-      options,
-    )) as T[];
+    const query = `SELECT * FROM ${this.model.details.tableName} WHERE id = $1;`;
+
+    const _obj = (await this.model.query(query, [id], options)) as T[];
     const obj = _obj[0];
     if (!obj) throw new AppError("Not found.", 400);
     return obj;
@@ -94,8 +90,10 @@ export class DbModelOps<T extends z.infer<z.ZodObject>> {
   ) => {
     const data = convertCamelToSnake(removeUndefined(_data));
 
+    const query = `INSERT INTO ${this.model.details.tableName}(${Object.keys(data).join(", ")}) VALUES(${DbModelUtils.createPlaceholdersFromTo(1, Object.values(data).length).join(", ")}) RETURNING *;`;
+
     const _obj = (await this.model.query(
-      `INSERT INTO ${this.model.details.tableName}(${Object.keys(data).join(", ")}) VALUES(${DbModelUtils.createPlaceholdersFromTo(1, Object.values(data).length).join(", ")}) RETURNING *;`,
+      query,
       [...Object.values(data)],
       options,
     )) as T[];
@@ -112,8 +110,10 @@ export class DbModelOps<T extends z.infer<z.ZodObject>> {
     const data = convertCamelToSnake(removeUndefined(_data));
     const filters = convertCamelToSnake(removeUndefined(_filters));
 
+    const query = `UPDATE ${this.model.details.tableName} SET ${DbModelUtils.createPlaceholdersWithKeysFrom(Object.keys(data), 1).join(", ")}${Object.keys(this.model.schema.shape).includes("updatedAt") ? ", updated_at = NOW()" : ""} WHERE ${DbModelUtils.createPlaceholdersWithKeysFrom(Object.keys(filters), Object.keys(data).length + 1).join(" AND ")} RETURNING *;`;
+
     const _obj = (await this.model.query(
-      `UPDATE ${this.model.details.tableName} SET ${DbModelUtils.createPlaceholdersWithKeysFrom(Object.keys(data), 1).join(", ")}${Object.keys(this.model.schema.shape).includes("updatedAt") ? ", updated_at = NOW()" : ""} WHERE ${DbModelUtils.createPlaceholdersWithKeysFrom(Object.keys(filters), Object.keys(data).length + 1).join("AND")} RETURNING *;`,
+      query,
       [...Object.values(data), ...Object.values(filters)],
       options,
     )) as T[];
@@ -128,8 +128,10 @@ export class DbModelOps<T extends z.infer<z.ZodObject>> {
   ) => {
     const filters = convertCamelToSnake(removeUndefined(_filters));
 
+    const query = `DELETE FROM ${this.model.details.tableName} WHERE ${DbModelUtils.createPlaceholdersWithKeysFrom(Object.keys(filters), 1).join(" AND ")} RETURNING *;`;
+
     const objs = await this.model.query(
-      `DELETE FROM FROM ${this.model.details.tableName} WHERE ${DbModelUtils.createPlaceholdersWithKeysFrom(Object.keys(filters), 1).join("AND")} RETURNING *;`,
+      query,
       [...Object.values(filters)],
       options,
     );
