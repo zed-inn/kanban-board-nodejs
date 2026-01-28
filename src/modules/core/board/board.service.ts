@@ -10,7 +10,7 @@ export class BoardService {
 
   static getByUserId = async (userId: ID, page: number) => {
     const boards = await Board.query(
-      "SELECT boards.* FROM boards JOIN members ON members.board_id = boards.id WHERE members.member_id = $1 OFFSET $2 LIMIT $3 ORDER BY boards.updated_at DESC;",
+      "SELECT boards.* FROM boards JOIN members ON members.board_id = boards.id WHERE members.member_id = $1 ORDER BY boards.updated_at DESC OFFSET $2 LIMIT $3;",
       [userId, this.offset(page), PER_PAGE.BOARDS],
     );
     return boards;

@@ -6,15 +6,15 @@ import {
 import { BoardHandler } from "./board.handler";
 import { DeleteBoardParamsSchema } from "./schemas/delete-board.schema";
 import {
+  UpdateBoardBodySchema,
   UpdateBoardParamsSchema,
-  UpdateBoardQuerySchema,
   UpdateBoardResponseSchema,
 } from "./schemas/update-board.schema";
 import {
   CreateBoardBodySchema,
   CreateBodyResponseSchema,
 } from "./schemas/create-board.schema";
-import { RestrictTo } from "@shared/middlewares/restrict-to";
+import { RestrictTo } from "@shared/hooks/restrict-to";
 
 export const BoardRouter = async (router: ZodFastifyInstance) => {
   router.get(
@@ -45,8 +45,8 @@ export const BoardRouter = async (router: ZodFastifyInstance) => {
     "/:id",
     {
       schema: {
+        body: UpdateBoardBodySchema,
         params: UpdateBoardParamsSchema,
-        querystring: UpdateBoardQuerySchema,
         response: { 200: UpdateBoardResponseSchema },
       },
       preHandler: [RestrictTo.loggedInUser, RestrictTo.memberOfBoard("id")],

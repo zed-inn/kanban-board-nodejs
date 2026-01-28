@@ -16,7 +16,7 @@ import {
   UpdateCardResponseSchema,
 } from "./schemas/update-card.schema";
 import { DeleteCardParamsSchema } from "./schemas/delete-card.schema";
-import { RestrictTo } from "@shared/middlewares/restrict-to";
+import { RestrictTo } from "@shared/hooks/restrict-to";
 
 export const CardRouter = async (router: ZodFastifyInstance) => {
   router.get(

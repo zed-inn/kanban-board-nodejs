@@ -13,6 +13,7 @@ const cardSqlSchema = `CREATE TABLE IF NOT EXISTS cards (
                         position NUMERIC UNIQUE NOT NULL DEFAULT 0,
                         ${TABLE.CREATED_AT},
                         ${TABLE.UPDATED_AT},
+                        UNIQUE(column_id, position) DEFERRABLE INITIALLY DEFERRED,
                         ${TABLE.FOREIGN_KEY("board_id", "boards", "id")} ${TABLE.ON_DELETE.CASCADE},
                         ${TABLE.FOREIGN_KEY("column_id", "columns", "id")} ${TABLE.ON_DELETE.CASCADE}
                       );`;

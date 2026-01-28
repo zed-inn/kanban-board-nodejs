@@ -6,7 +6,7 @@ import {
   AddMemberResponseSchema,
 } from "./schemas/add-member.schema";
 import { ExitMembershipParamsSchema } from "./schemas/exit-membership.schema";
-import { RestrictTo } from "@shared/middlewares/restrict-to";
+import { RestrictTo } from "@shared/hooks/restrict-to";
 
 export const MemberRouter = async (router: ZodFastifyInstance) => {
   router.post(

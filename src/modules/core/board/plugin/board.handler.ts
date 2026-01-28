@@ -7,8 +7,8 @@ import {
   CreateBodyResponse,
 } from "./schemas/create-board.schema";
 import {
+  UpdateBoardBody,
   UpdateBoardParams,
-  UpdateBoardQuery,
   UpdateBoardResponse,
 } from "./schemas/update-board.schema";
 import { DeleteBoardParams } from "./schemas/delete-board.schema";
@@ -42,13 +42,13 @@ export class BoardHandler {
 
   static updateBoard = async (
     req: FastifyRequest<{
-      Querystring: UpdateBoardQuery;
+      Body: UpdateBoardBody;
       Params: UpdateBoardParams;
     }>,
     reply: FastifyReply,
   ): Promise<UpdateBoardResponse> => {
     const p = req.params,
-      q = req.query;
+      q = req.body;
     const user = AuthPayloadSchema.parse(req.user);
 
     const board = await BoardService.updateById(q.name, p.id, user.id);

@@ -13,7 +13,7 @@ export class CardService {
 
   static getByColumnId = async (columnId: ID, boardId: ID, page: number) => {
     const cards = await Card.query(
-      "SELECT * FROM cards WHERE column_id = $1 AND board_id = $2 OFFSET $3 LIMIT $4 ORDER BY position ASC;",
+      "SELECT * FROM cards WHERE column_id = $1 AND board_id = $2 ORDER BY position ASC OFFSET $3 LIMIT $4;",
       [columnId, boardId, this.offset(page), PER_PAGE.CARDS],
     );
     return cards;
@@ -26,7 +26,7 @@ export class CardService {
     options: DatabaseConnServiceOptions = {},
   ) => {
     const card = await Card.query(
-      `SELECT * FROM cards WHERE position ${side ? (side === "AFTER" ? ">" : "<") : "="} $1 AND column_id = $2 LIMIT 1 ORDER BY position ASC`,
+      `SELECT * FROM cards WHERE position ${side ? (side === "AFTER" ? ">" : "<") : "="} $1 AND column_id = $2 ORDER BY position ASC LIMIT 1;`,
       [pos, columnId],
       options,
     );
@@ -45,7 +45,7 @@ export class CardService {
       await client.beginTransaction();
 
       const _lastCol = await Card.query(
-        "SELECT * FROM cards WHERE column_id = $1 AND board_id = $2 LIMIT 1 ORDER BY position DESC;",
+        "SELECT * FROM cards WHERE column_id = $1 AND board_id = $2 ORDER BY position DESC LIMIT 1;",
         [columnId, boardId],
       );
       const lastCol = _lastCol[0] ?? null;

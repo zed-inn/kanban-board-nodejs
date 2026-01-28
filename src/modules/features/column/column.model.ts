@@ -9,9 +9,10 @@ const columnSqlSchema = `CREATE TABLE IF NOT EXISTS columns (
                           ${TABLE.ID_PRIM_KEY},
                           board_id UUID NOT NULL,
                           name VARCHAR(255) NOT NULL,
-                          position NUMERIC UNIQUE NOT NULL DEFAULT 0,
+                          position NUMERIC NOT NULL DEFAULT 0,
                           ${TABLE.CREATED_AT},
                           ${TABLE.UPDATED_AT},
+                          UNIQUE(board_id, position) DEFERRABLE INITIALLY DEFERRED,
                           ${TABLE.FOREIGN_KEY("board_id", "boards", "id")} ${TABLE.ON_DELETE.CASCADE}
                         );`;
 

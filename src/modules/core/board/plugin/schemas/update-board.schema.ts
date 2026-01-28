@@ -2,9 +2,9 @@ import { z } from "zod";
 import { BoardModel } from "../../board.model";
 import { GlobalResponseSchema } from "@shared/schemas/global.schema";
 
-export const UpdateBoardQuerySchema = BoardModel.pick({ name: true });
+export const UpdateBoardBodySchema = BoardModel.pick({ name: true });
 
-export type UpdateBoardQuery = z.infer<typeof UpdateBoardQuerySchema>;
+export type UpdateBoardBody = z.infer<typeof UpdateBoardBodySchema>;
 
 export const UpdateBoardParamsSchema = BoardModel.pick({ id: true });
 

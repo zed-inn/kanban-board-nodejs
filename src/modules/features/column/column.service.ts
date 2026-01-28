@@ -16,7 +16,7 @@ export class ColumnService {
 
   static getByBoardId = async (boardId: ID, page: number) => {
     const columns = await Column.query(
-      "SELECT * FROM columns WHERE board_id = $1 OFFSET $2 LIMIT $3 ORDER BY position ASC;",
+      "SELECT * FROM columns WHERE board_id = $1 ORDER BY position ASC OFFSET $2 LIMIT $3;",
       [boardId, this.offset(page), PER_PAGE.COLUMNS],
     );
     return columns;
@@ -28,7 +28,7 @@ export class ColumnService {
     options: DatabaseConnServiceOptions = {},
   ) => {
     const column = await Column.query(
-      `SELECT * FROM columns WHERE position ${side ? (side === "AFTER" ? ">" : "<") : "="} $1 LIMIT 1 ORDER BY position ASC`,
+      `SELECT * FROM columns WHERE position ${side ? (side === "AFTER" ? ">" : "<") : "="} $1 ORDER BY position ASC LIMIT 1;`,
       [pos],
       options,
     );
@@ -42,7 +42,7 @@ export class ColumnService {
       await client.beginTransaction();
 
       const _lastCol = await Column.query(
-        "SELECT * FROM columns LIMIT 1 ORDER BY position DESC;",
+        "SELECT * FROM columns ORDER BY position DESC LIMIT 1;",
       );
       const lastCol = _lastCol[0] ?? null;
       const lastPosition = lastCol?.position ?? 0;

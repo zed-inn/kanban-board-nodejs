@@ -17,7 +17,7 @@ import {
 } from "./schemas/update-column.schema";
 import { DeleteColumnParamsSchema } from "./schemas/delete-column.schema";
 import { CardRouter } from "../card";
-import { RestrictTo } from "@shared/middlewares/restrict-to";
+import { RestrictTo } from "@shared/hooks/restrict-to";
 
 export const ColumnRouter = async (router: ZodFastifyInstance) => {
   router.register(CardRouter, { prefix: "/:columnId/cards" });
