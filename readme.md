@@ -335,3 +335,7 @@ I used postgresql database, and sql queries are used instead of ORMs. I learned 
 query is built, what is its order and how to JOIN on SELECT.
 I learned how to build Access and Refresh Tokens and Set in Cookies.
 I learned how to read cookies over socket connection and reuse the access tokens.
+
+## Ai generated content
+
+`Dockerfile`, `.dockerignore` and `docker-compose.yml` was generated with AI.
