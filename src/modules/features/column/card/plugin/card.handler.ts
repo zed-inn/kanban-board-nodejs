@@ -16,6 +16,7 @@ import {
   UpdateCardResponse,
 } from "./schemas/update-card.schema";
 import { DeleteCardParams } from "./schemas/delete-card.schema";
+import io from "@/io";
 
 export class CardHandler {
   static getCards = async (
@@ -48,6 +49,7 @@ export class CardHandler {
       p.columnId,
       p.boardId,
     );
+    io.to(card.boardId).emit("create-card", card);
 
     reply.status(201);
     return { message: "Card created.", data: { card } };
@@ -61,6 +63,7 @@ export class CardHandler {
       p = req.params;
 
     const card = await CardService.updateById(b, p.id, p.columnId, p.boardId);
+    io.to(card.boardId).emit("update-card", card);
 
     reply.status(200);
     return { message: "Card updated.", data: { card } };
@@ -73,6 +76,7 @@ export class CardHandler {
     const p = req.params;
 
     const card = await CardService.deleteById(p.id, p.columnId, p.boardId);
+    io.to(card.boardId).emit("delete-card", card);
 
     reply.status(204);
     return;

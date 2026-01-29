@@ -16,6 +16,7 @@ import {
   UpdateColumnResponse,
 } from "./schemas/update-column.schema";
 import { DeleteColumnParams } from "./schemas/delete-column.schema";
+import io from "@/io";
 
 export class ColumnHandler {
   static getColumns = async (
@@ -42,6 +43,7 @@ export class ColumnHandler {
       p = req.params;
 
     const column = await ColumnService.create(b.name, p.boardId);
+    io.to(column.boardId).emit("create-column", column);
 
     reply.status(201);
     return { message: "Column created.", data: { column } };
@@ -55,6 +57,7 @@ export class ColumnHandler {
       p = req.params;
 
     const column = await ColumnService.updateById(b, p.id, p.boardId);
+    io.to(column.boardId).emit("update-column", column);
 
     reply.status(200);
     return { message: "Column updated.", data: { column } };
@@ -67,6 +70,7 @@ export class ColumnHandler {
     const p = req.params;
 
     const column = await ColumnService.deleteById(p.id, p.boardId);
+    io.to(column.boardId).emit("delete-column", column);
 
     reply.status(204);
     return;
