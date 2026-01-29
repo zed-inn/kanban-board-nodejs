@@ -1,6 +1,5 @@
 import fastify from "fastify";
 import { env } from "@config/env";
-import { AppRouter } from "@shared/plugins/app.route";
 import fastifyCookie from "@fastify/cookie";
 import {
   serializerCompiler,
@@ -20,6 +19,5 @@ app.decorateRequest("user", undefined);
 
 app.register(fastifyCookie);
 app.register(authenticate);
-app.register(AppRouter);
 
 export default app;

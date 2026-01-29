@@ -4,6 +4,7 @@ import db from "@config/db";
 import app from "./app";
 import io from "./io";
 import { models } from "@shared/db/tables";
+import { AppRouter } from "@shared/plugins/app.route";
 
 const startServer = async () => {
   try {
@@ -13,6 +14,8 @@ const startServer = async () => {
       app.log.info("Postgres connected.");
       await models.runAll(() => console.log("Tables created."));
     }
+    app.register(AppRouter);
+    app.log.info("Routes established");
     await app.listen({ port: env.APP_PORT, host: env.APP_HOST });
   } catch (err) {
     app.log.error(err);

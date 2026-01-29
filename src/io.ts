@@ -24,7 +24,7 @@ io.on("connection", async (socket) => {
     SOCKET.EVENTS["join-board"],
     (boardId: ID, callback: (response: GlobalResponse<{}>) => void) => {
       socket._cleanup(); // make socket leave all rooms
-      socket.join(boardId); // make socket only join the current board
+      socket.join(`board:${boardId}`); // make socket only join the current board
 
       callback({ message: "Board selected." });
     },
