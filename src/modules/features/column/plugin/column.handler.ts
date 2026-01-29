@@ -43,7 +43,7 @@ export class ColumnHandler {
       p = req.params;
 
     const column = await ColumnService.create(b.name, p.boardId);
-    io.to(column.boardId).emit("create-column", column);
+    io.to(`board:${column.boardId}`).emit("column.create", column);
 
     reply.status(201);
     return { message: "Column created.", data: { column } };
@@ -57,7 +57,7 @@ export class ColumnHandler {
       p = req.params;
 
     const column = await ColumnService.updateById(b, p.id, p.boardId);
-    io.to(column.boardId).emit("update-column", column);
+    io.to(`board:${column.boardId}`).emit("column.update", column);
 
     reply.status(200);
     return { message: "Column updated.", data: { column } };
@@ -70,7 +70,7 @@ export class ColumnHandler {
     const p = req.params;
 
     const column = await ColumnService.deleteById(p.id, p.boardId);
-    io.to(column.boardId).emit("delete-column", column);
+    io.to(`board:${column.boardId}`).emit("column.delete", column);
 
     reply.status(204);
     return;
