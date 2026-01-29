@@ -8,3 +8,8 @@ export type GlobalDto = z.infer<typeof GlobalSchema>;
 
 export const GlobalResponseSchema = <T extends z.ZodRawShape>(data?: T) =>
   z.object({ message: z.string(), ...(data ? { data: z.object(data) } : {}) });
+
+export type GlobalResponse<T extends unknown> = {
+  message: string;
+  data?: T;
+};

@@ -1,5 +1,5 @@
 import app from "@/app";
-import io from "../../socket";
+import io from "../../io";
 import db from "@config/db";
 
 export const shutdown = async (signal: string) => {
